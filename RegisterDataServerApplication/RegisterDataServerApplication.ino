@@ -7,13 +7,21 @@
 // este parâmetro altera conforme a validade do certificado
 const char* fingerprint = "C3:75:80:CA:88:E2:40:62:94:8F:E9:E9:BD:18:81:B8:33:39:AA:33";
 
-
 const char* ssid = "NOME DA REDE";
 const char* password = "SENHA DA REDE";
 const char* host = "https://hortitalk-api.herokuapp.com"; // URL para o servidor
 const String boardId = WiFi.macAddress();
+
+// Propriedades para passar para registro e busca no servidor
+const String TEMPERATURA = "temperatura";
+const String UMIDADE = "umidade";
+const String BOARD_ID = "board_id";
+
 boolean placaExiste = false;
 
+// Configurações para requisições com SSL
+std::unique_ptr<BearSSL::WiFiClientSecure>client(new BearSSL::WiFiClientSecure);
+HTTPClient https;
 
 int temperatura = 20;
 int umidade = 21;
@@ -32,95 +40,84 @@ void setup() {
 
 void loop() {
   if (WiFi.status() == WL_CONNECTED) {
-    std::unique_ptr<BearSSL::WiFiClientSecure>client(new BearSSL::WiFiClientSecure);
     client->setFingerprint(fingerprint);
 
-    HTTPClient https;
-
     // Verificar se placa existe
-    if(https.begin(*client, construirUrlVerificarPlacaExiste())) {
-      DynamicJsonDocument jsonTemperatura(1024);
-      
-      https.addHeader("Content-Type", "application/json");
-      int httpCode = https.GET();
-  
-      Serial.println(httpCode);
-      if (httpCode > 0) {
-        String payload = https.getString();
-        Serial.println(payload);
-        placaExiste = (payload == "true");
-      } else {
-        Serial.printf("[HTTPS] POST... failed, error: %s\n", https.errorToString(httpCode).c_str());
-      }
-      https.end();
-    }
+    verificarSePlacaJaRegistrada();
 
-    // Registrar Placa
+    // Registrar Placa, caso não esteja cadastrada
     if (!placaExiste) {
-      if(https.begin(*client, construirUrlRegistrarPlaca())) {
-        DynamicJsonDocument jsonTemperatura(1024);
-        jsonTemperatura["board_id"] = boardId;
-        
-        String json;
-        serializeJson(jsonTemperatura, json);
-        
-        https.addHeader("Content-Type", "application/json");
-        int httpCode = https.POST(json);
-    
-        Serial.println(httpCode);
-        if (httpCode > 0) {
-          String payload = https.getString();
-          Serial.println(payload);
-        } else {
-          Serial.printf("[HTTPS] POST... failed, error: %s\n", https.errorToString(httpCode).c_str());
-        }
-        https.end();
-      }
+      registrarInformacoesServidor(construirUrlRegistrarPlaca(), BOARD_ID, boardId);
     }
     
     // Registrar Temperatura
-    if(https.begin(*client, construirUrlRegistrarTemperatura())) {
-      DynamicJsonDocument jsonTemperatura(1024);
-      jsonTemperatura["temperatura"] = temperatura++;
-      
-      String json;
-      serializeJson(jsonTemperatura, json);
-      
-      https.addHeader("Content-Type", "application/json");
-      int httpCode = https.POST(json);
-  
-      Serial.println(httpCode);
-      if (httpCode > 0) {
-        String payload = https.getString();
-        Serial.println(payload);
-      } else {
-        Serial.printf("[HTTPS] POST... failed, error: %s\n", https.errorToString(httpCode).c_str());
-      }
-      https.end();
-    }
+    registrarInformacoesServidor(construirUrlRegistrarTemperatura(), TEMPERATURA, temperatura++);
 
     // Registrar Umidade
-    if(https.begin(*client, construirUrlRegistrarUmidade())) {
-      DynamicJsonDocument jsonUmidade(1024);
-      jsonUmidade["umidade"] = umidade++;
-      
-      String json;
-      serializeJson(jsonUmidade, json);
-      
-      https.addHeader("Content-Type", "application/json");
-      int httpCode = https.POST(json);
-  
-      Serial.println(httpCode);
-      if (httpCode > 0) {
-        String payload = https.getString();
-        Serial.println(payload);
-      } else {
-        Serial.printf("[HTTPS] POST... failed, error: %s\n", https.errorToString(httpCode).c_str());
-      }
-      https.end();
-    }
+    registrarInformacoesServidor(construirUrlRegistrarUmidade(), UMIDADE, umidade++);
   }
   delay(5000);
+}
+
+void verificarSePlacaJaRegistrada() {
+  if(https.begin(*client, construirUrlVerificarPlacaExiste())) {
+    DynamicJsonDocument jsonTemperatura(1024);
+    
+    https.addHeader("Content-Type", "application/json");
+    int httpCode = https.GET();
+    
+    if (httpCode > 0) {
+      String payload = https.getString();
+      placaExiste = (payload == "true");
+    } else {
+      Serial.printf("[HTTPS] POST... failed, error: %s\n", https.errorToString(httpCode).c_str());
+    }
+    https.end();
+  }
+}
+
+void registrarInformacoesServidor(String url, String propriedade, int valor) {
+  if(https.begin(*client, url)) {
+    DynamicJsonDocument documentJson(1024);
+    documentJson[propriedade] = valor;
+        
+    String json;
+    serializeJson(documentJson, json);
+        
+    https.addHeader("Content-Type", "application/json");
+    int httpCode = https.POST(json);
+    
+    Serial.println(httpCode);
+    if (httpCode > 0) {
+      String payload = https.getString();
+      Serial.println(payload);
+    } else {
+      Serial.printf("[HTTPS] POST... failed, error: %s\n", https.errorToString(httpCode).c_str());
+    }
+    https.end();
+  }
+}
+
+void registrarInformacoesServidor(String url, String propriedade, String valor) {
+  if(https.begin(*client, url)) {
+    DynamicJsonDocument documentJson(1024);
+    documentJson[propriedade] = valor;
+        
+    String json;
+    serializeJson(documentJson, json);
+        
+    https.addHeader("Content-Type", "application/json");
+    int httpCode = https.POST(json);
+    
+    Serial.println(httpCode);
+    if (httpCode > 0) {
+      String payload = https.getString();
+      Serial.println(payload);
+    } else {
+      Serial.printf("[HTTPS] POST... failed, error: %s\n", https.errorToString(httpCode).c_str());
+    }
+    https.end();
+  }
 }
 
 String construirUrlVerificarPlacaExiste() {
