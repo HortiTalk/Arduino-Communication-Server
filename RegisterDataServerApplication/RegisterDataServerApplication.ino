@@ -1,7 +1,7 @@
 #include <ArduinoJson.h>
 #include <Arduino.h>
 #include "src/UrlBuilder/urlBuilder.h"
-#include "serverRequest.h"
+#include "src/ServerRequest/serverRequest.h"
 #include <ESP8266WiFi.h>
 #include <WiFiClientSecureBearSSL.h>
 #include "DHT.h"
@@ -16,13 +16,12 @@ const char* fingerprint = "E1:87:83:58:FE:6B:0E:DF:61:F2:12:AE:D2:F2:C3:7F:A2:70
 
 const char* ssid = "Wifi";
 const char* password = "123456789";
-const char* host = "https://hortitalk-server.herokuapp.com"; // URL para o servidor
+const String host = "https://hortitalk-server.herokuapp.com";
 const String boardCode = WiFi.macAddress();
 
 // Configurações para requisições com SSL
 std::unique_ptr<BearSSL::WiFiClientSecure>client(new BearSSL::WiFiClientSecure);
-HTTPClient https;
-UrlBuilder* urlBuilder = new UrlBuilder((String(host)));
+UrlBuilder* urlBuilder = new UrlBuilder(host);
 ServerRequest* serverRequest = new ServerRequest(client);
 
 DHT dht(DHTPIN, DHTTYPE);
@@ -43,7 +42,6 @@ void setup() {
 }
 
 void loop() {
-
   temperatura = dht.readTemperature();
   umidade = dht.readHumidity();
   umidade_solo = analogRead(pino_sinal_analogico);
