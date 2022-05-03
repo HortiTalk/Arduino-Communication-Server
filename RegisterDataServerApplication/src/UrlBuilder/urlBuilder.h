@@ -1,7 +1,7 @@
 /*
   url_builder.h
 
-  Autor: Lucas Rodrigues Severo
+  Autor: Hortitalk
 
   Dezembro de 2021
 */

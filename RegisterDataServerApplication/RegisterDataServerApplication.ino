@@ -11,8 +11,9 @@
 #include <ESP8266HTTPClient.h>
 
 // este parâmetro altera conforme a validade do certificado
-const char* fingerprint = "E1:87:83:58:FE:6B:0E:DF:61:F2:12:AE:D2:F2:C3:7F:A2:70:6C:5C";
-// Outro 39:A9:C4:FE:B1:7E:23:9E:2F:4D:BB:AC:E8:D7:A3:4F:CE:43:0E:7B
+const char* fingerprint = "B5:86:32:41:D3:FB:3D:2B:56:26:0E:A3:51:14:75:E8:DC:FD:4A:9B";
+//  E1:87:83:58:FE:6B:0E:DF:61:F2:12:AE:D2:F2:C3:7F:A2:70:6C:5C
+//  39:A9:C4:FE:B1:7E:23:9E:2F:4D:BB:AC:E8:D7:A3:4F:CE:43:0E:7B
 
 const char* ssid = "Wifi";
 const char* password = "123456789";
@@ -42,9 +43,9 @@ void setup() {
 }
 
 void loop() {
-  temperatura = dht.readTemperature();
-  umidade = dht.readHumidity();
-  umidade_solo = analogRead(pino_sinal_analogico);
+//  temperatura = dht.readTemperature();
+//  umidade = dht.readHumidity();
+//  umidade_solo = analogRead(pino_sinal_analogico);
   
   if (WiFi.status() == WL_CONNECTED) {
     client->setFingerprint(fingerprint);

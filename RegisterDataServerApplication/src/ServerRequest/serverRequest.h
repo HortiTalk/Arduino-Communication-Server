@@ -1,7 +1,7 @@
 /*
   serverRequest.h
 
-  Autor: Lucas Rodrigues Severo
+  Autor: Hortitalk
 
   Dezembro de 2021
 */
@@ -21,6 +21,7 @@ const String UMIDADE_SOLO = "umidade";
 const String CULTIVO = "cultivo";
 const String BOARD_CODE = "codigo";
 const String MODULO = "modulo";
+const String VIVEIRO = "viveiro";
 
 class ServerRequest {
   private:
@@ -31,7 +32,7 @@ class ServerRequest {
   public:
     ServerRequest(std::unique_ptr<BearSSL::WiFiClientSecure>& client);
     boolean verificarSePlacaJaRegistrada(String url);
-    void registrarPlaca(String url, String boardCode, int cultivo);
+    void registrarPlaca(String url, String boardCode, int viveiro);
     void registrarTemperatura(String url, int temperatura, String boardCode);
     void registrarUmidade(String url, int umidade, String boardCode);
     void registrarUmidadeSolo(String url, int umidade, String boardCode);

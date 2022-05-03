@@ -18,8 +18,8 @@ ServerRequest::ServerRequest(std::unique_ptr<BearSSL::WiFiClientSecure>& client)
   _client = &client;
 }
 
-void ServerRequest::registrarPlaca(String url, String boardCode, int cultivo) {
-  registrarInformacoesServidorModulo(url, BOARD_CODE, boardCode, CULTIVO, 1);
+void ServerRequest::registrarPlaca(String url, String boardCode, int viveiro) {
+  registrarInformacoesServidorModulo(url, BOARD_CODE, boardCode, VIVEIRO, viveiro);
 }
 
 void ServerRequest::registrarTemperatura(String url, int temperatura, String boardCode) {
